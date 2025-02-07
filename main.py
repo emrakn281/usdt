@@ -33,6 +33,7 @@ def get_binance_usdt_try():
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
+        print(float(data["price"]))
         return float(data["price"])
     return None
 
@@ -48,6 +49,7 @@ def get_google_usd_try():
             price_element = soup.find("span", class_="PriceValue")
             if price_element:
                 price = float(price_element.text.replace(",", ".").strip())
+                print(price)
                 return price
         except Exception as e:
             print("Hata oluştu:", e)
