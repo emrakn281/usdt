@@ -8,9 +8,22 @@ binance_price = None
 # Flask uygulaması oluştur
 app = Flask(__name__)
 
+last_message = ""
+
 @app.route('/')
 def home():
-    return "Bot is running!"
+    # Web sitesinde gösterilecek mesaj
+    return render_template_string("""
+        <html>
+            <head>
+                <title>USDT BOT LIVE</title>
+            </head>
+            <body>
+                <h1>FİYATLAR!</h1>
+                <p>{{ message }}</p>
+            </body>
+        </html>
+    """, message=last_message)
 
 # Flask'i arka planda çalıştırmak için thread kullan
 import threading
@@ -81,7 +94,6 @@ def get_google_usd_try():
             price_element = soup.find("span", class_="PriceValue")
             if price_element:
                 price = float(price_element.text.replace(",", ".").strip())
-                send_telegram_message(price)
                 return price
         except Exception as e:
             send_telegram_message("Hata oluştu:", e)
@@ -92,6 +104,7 @@ def get_google_usd_try():
 import time
 
 def calculate_and_send():
+    global last_message  # Global değişkeni güncelleyeceğiz
     while True:
         try:
             binance_price = get_binance_price()
@@ -106,19 +119,23 @@ def calculate_and_send():
 
             # Farkı hesapla
             difference = ((google_price - binance_price) / google_price) * 100
+            action = "AL" if difference > 0 else "SAT"  # Fark pozitifse "AL", negatifse "SAT"
+
             message = (
-                f"📢 **Fiyat Güncellemesi** 📢\n"
+                f"📢 **{action}** 📢\n"
                 f"🔹 **Binance USDT/TRY**: {binance_price} ₺\n"
-                f"🔹 **Google USD/TRY**: {google_price} ₺\n"
+                f"🔹 **Yandex USD/TRY**: {google_price} ₺\n"
                 f"🔹 **Fark**: %{difference:.2f}\n"
             )
 
             send_telegram_message(message)
             print("Mesaj gönderildi:", message)
+            last_message = message
 
         except Exception as e:
             send_telegram_message(f"Hata oluştu: {e}")
             print("Hata:", e)
+            last_message = message
 
         # 1 dakika bekle (60 saniye)
         time.sleep(60)
