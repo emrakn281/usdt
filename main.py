@@ -60,14 +60,14 @@ def get_google_usd_try():
     try:
         url = "https://yandex.com.tr/finance/convert?from=USD&to=TRY&source=main"
         response = requests.get(url)
-        send_telegram_message(response)
+        print(response)
         response.raise_for_status()  # HTTP hatalarını tetikler
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, 'html.parser')
             # Döviz kuru verisini almak için doğru HTML elementini bulmamız lazım
-            send_telegram_message(soup)
+            print(soup)
             price_element = soup.find("span", class_="PriceValue")
-            send_telegram_message(price_element)
+            print(price_element)
             if price_element:
                 price = float(price_element.text.replace(",", ".").strip())
                 return price
