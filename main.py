@@ -31,6 +31,7 @@ def send_telegram_message(message):
 def get_binance_usdt_try():
     url = "https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY"
     response = requests.get(url)
+    send_telegram_message(response)
     if response.status_code == 200:
         data = response.json()
         send_telegram_message(float(data["price"]))
