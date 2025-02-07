@@ -36,11 +36,20 @@ def get_binance_usdt_try():
 
 # USD/TRY kurunu çekme fonksiyonu
 def get_google_usd_try():
-    url = "https://api.exchangerate.host/latest?base=USD&symbols=TRY"
+    url = "https://yandex.com.tr/finance/convert?from=USD&to=TRY&source=main"
     response = requests.get(url)
     if response.status_code == 200:
-        data = response.json()
-        return float(data["rates"]["TRY"])
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Döviz kuru verisini almak için doğru HTML elementini bulmamız lazım
+        try:
+            price_element = soup.find("span", class_="converter__result-value")
+            if price_element:
+                price = float(price_element.text.replace(",", ".").strip())
+                return price
+        except Exception as e:
+            print("Hata oluştu:", e)
+    
     return None
 
 # Fiyatları al, oranı hesapla ve Telegram'a gönder
