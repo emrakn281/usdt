@@ -43,7 +43,7 @@ def get_google_usd_try():
         
         # Döviz kuru verisini almak için doğru HTML elementini bulmamız lazım
         try:
-            price_element = soup.find("span", class_="converter__result-value")
+            price_element = soup.find("span", class_="PriceValue")
             if price_element:
                 price = float(price_element.text.replace(",", ".").strip())
                 return price
