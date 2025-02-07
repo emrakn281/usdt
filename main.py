@@ -14,7 +14,7 @@ def home():
     return render_template_string("""
         <html>
             <head>
-                <title>Bot Çalışıyor</title>
+                <title>Bot Çalışıyor mu?</title>
             </head>
             <body>
                 <h1>Bot is running!</h1>
