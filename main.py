@@ -116,4 +116,4 @@ threading.Thread(target=run_flask, daemon=True).start()
 # Döngü her 15 dakikada bir güncellenir
 while True:
     calculate_and_update()
-    time.sleep(900)
+    time.sleep(60)
