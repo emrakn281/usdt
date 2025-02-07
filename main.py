@@ -1,8 +1,10 @@
 import requests
 from flask import Flask
 from bs4 import BeautifulSoup
+import websocket
+import json
 
-
+binance_price = None
 # Flask uygulaması oluştur
 app = Flask(__name__)
 
@@ -27,16 +29,45 @@ def send_telegram_message(message):
     data = {"chat_id": CHAT_ID, "text": message}
     requests.post(url, data=data)
 
+# Global değişken: Fiyatı saklamak için
+# WebSocket URL'si
+binance_ws_url = "wss://stream.binance.com:9443/ws/usdttry@trade"
+
+# WebSocket callback fonksiyonu
+def on_message(ws, message):
+    global binance_price  # Global değişkeni güncelle
+    data = json.loads(message)
+    binance_price = float(data['p'])
+    print(f"Canlı USDT/TRY Fiyatı: {binance_price} ₺")
+    
+    # Veriyi aldıktan sonra WebSocket bağlantısını kapatıyoruz
+    ws.close()
+
+def on_error(ws, error):
+    print(f"WebSocket Hatası: {error}")
+
+def on_close(ws, close_status_code, close_msg):
+    print("WebSocket bağlantısı kapandı")
+
+def on_open(ws):
+    print("WebSocket bağlantısı açıldı")
+
+# WebSocket bağlantısını başlatıp fiyatı döndüren fonksiyon
+def get_binance_price():
+    ws = websocket.WebSocketApp(binance_ws_url, 
+                                on_message=on_message,
+                                on_error=on_error,
+                                on_close=on_close)
+
+    ws.on_open = on_open
+    ws.run_forever()
+
+    return binance_price  # Fiyatı döndür
+
+# Fiyatı al
+
 # Binance USDT/TRY fiyatını çekme fonksiyonu (Selenium yok)
-def get_binance_usdt_try():
-    url = "https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY"
-    response = requests.get(url)
-    send_telegram_message(response)
-    if response.status_code == 200:
-        data = response.json()
-        send_telegram_message(float(data["price"]))
-        return float(data["price"])
-    return None
+
 
 # USD/TRY kurunu çekme fonksiyonu
 def get_google_usd_try():
@@ -63,7 +94,8 @@ import time
 def calculate_and_send():
     while True:
         try:
-            binance_price = get_binance_usdt_try()
+            binance_price = get_binance_price()
+
             google_price = get_google_usd_try()
 
             print(f"Binance USDT/TRY: {binance_price}")
