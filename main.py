@@ -138,7 +138,7 @@ def calculate_and_send():
             last_message = message
 
         # 1 dakika bekle (60 saniye)
-        time.sleep(60)
+        time.sleep(600)
 
 # Hesaplama fonksiyonunu çalıştır
 calculate_and_send() 
