@@ -1,27 +1,14 @@
 import requests
-from flask import Flask, render_template_string
+from flask import Flask
 from bs4 import BeautifulSoup
+
 
 # Flask uygulaması oluştur
 app = Flask(__name__)
 
-# Global değişken: son gönderilen mesaj
-last_message = ""
-
 @app.route('/')
 def home():
-    # Web sitesinde gösterilecek mesaj
-    return render_template_string("""
-        <html>
-            <head>
-                <title>Bot Çalışıyor mu?</title>
-            </head>
-            <body>
-                <h1>Bot is running!</h1>
-                <p>{{ message }}</p>
-            </body>
-        </html>
-    """, message=last_message)
+    return "Bot is running!"
 
 # Flask'i arka planda çalıştırmak için thread kullan
 import threading
@@ -42,49 +29,35 @@ def send_telegram_message(message):
 
 # Binance USDT/TRY fiyatını çekme fonksiyonu (Selenium yok)
 def get_binance_usdt_try():
-    try:
-        url = "https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY"
-        response = requests.get(url)
-        response.raise_for_status()  # HTTP hatalarını tetikler
-        if response.status_code == 200:
-            data = response.json()
-            return float(data["price"])
-        else:
-            raise ValueError("Binance API'si beklenmedik bir sonuç döndü.")
-    except Exception as e:
-        print(f"Binance API hatası: {e}")
-        return None
+    url = "https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        return float(data["price"])
+    return None
 
 # USD/TRY kurunu çekme fonksiyonu
 def get_google_usd_try():
-    try:
-        url = "https://yandex.com.tr/finance/convert?from=USD&to=TRY&source=main"
-        response = requests.get(url)
-        print(response)
-        response.raise_for_status()  # HTTP hatalarını tetikler
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            # Döviz kuru verisini almak için doğru HTML elementini bulmamız lazım
-            print(soup)
+    url = "https://yandex.com.tr/finance/convert?from=USD&to=TRY&source=main"
+    response = requests.get(url)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Döviz kuru verisini almak için doğru HTML elementini bulmamız lazım
+        try:
             price_element = soup.find("span", class_="PriceValue")
-            print(price_element)
             if price_element:
                 price = float(price_element.text.replace(",", ".").strip())
                 return price
-            else:
-                raise ValueError("Döviz kuru bilgisi bulunamadı.")
-        else:
-            raise ValueError("Google/USD API'si beklenmedik bir sonuç döndü.")
-    except Exception as e:
-        print(f"Google USD/TRY hatası: {e}")
-        return None
+        except Exception as e:
+            print("Hata oluştu:", e)
+    
+    return None
 
 # Fiyatları al, oranı hesapla ve Telegram'a gönder
 import time
 
 def calculate_and_send():
-    global last_message  # Global değişkeni güncelle
-
     while True:
         try:
             binance_price = get_binance_usdt_try()
@@ -98,32 +71,22 @@ def calculate_and_send():
 
             # Farkı hesapla
             difference = ((google_price - binance_price) / google_price) * 100
-            action = "AL" if difference > 0 else "SAT"  # Fark pozitifse "AL", negatifse "SAT"
-
             message = (
                 f"📢 **Fiyat Güncellemesi** 📢\n"
                 f"🔹 **Binance USDT/TRY**: {binance_price} ₺\n"
                 f"🔹 **Google USD/TRY**: {google_price} ₺\n"
-                f"🔹 **Fark**: %{difference:.2f} - **{action}**\n"
+                f"🔹 **Fark**: %{difference:.2f}\n"
             )
 
-            # Telegram'a mesaj gönder
             send_telegram_message(message)
             print("Mesaj gönderildi:", message)
 
-            # Web sayfasında gösterilecek mesajı güncelle
-            last_message = message
-
         except Exception as e:
-            error_message = f"Hata oluştu: {e}"
-            send_telegram_message(error_message)
+            send_telegram_message(f"Hata oluştu: {e}")
             print("Hata:", e)
-
-            # Web sayfasında gösterilecek mesajı güncelle
-            last_message = error_message
 
         # 1 dakika bekle (60 saniye)
         time.sleep(60)
 
 # Hesaplama fonksiyonunu çalıştır
-calculate_and_send()
+calculate_and_send() 
