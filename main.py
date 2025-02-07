@@ -1,5 +1,5 @@
 import requests
-from flask import Flask
+from flask import Flask, render_template_string
 from bs4 import BeautifulSoup
 import websocket
 import json
