@@ -1,14 +1,27 @@
 import requests
-from flask import Flask
+from flask import Flask, render_template_string
 from bs4 import BeautifulSoup
-
 
 # Flask uygulaması oluştur
 app = Flask(__name__)
 
+# Global değişken: son gönderilen mesaj
+last_message = ""
+
 @app.route('/')
 def home():
-    return "Bot is running!"
+    # Web sitesinde gösterilecek mesaj
+    return render_template_string("""
+        <html>
+            <head>
+                <title>Bot Çalışıyor</title>
+            </head>
+            <body>
+                <h1>Bot is running!</h1>
+                <p>{{ message }}</p>
+            </body>
+        </html>
+    """, message=last_message)
 
 # Flask'i arka planda çalıştırmak için thread kullan
 import threading
@@ -58,6 +71,8 @@ def get_google_usd_try():
 import time
 
 def calculate_and_send():
+    global last_message  # Global değişkeni güncelleyeceğiz
+
     while True:
         try:
             binance_price = get_binance_usdt_try()
@@ -71,19 +86,29 @@ def calculate_and_send():
 
             # Farkı hesapla
             difference = ((google_price - binance_price) / google_price) * 100
+            action = "AL" if difference > 0 else "SAT"  # Fark pozitifse "AL", negatifse "SAT"
+
             message = (
                 f"📢 **Fiyat Güncellemesi** 📢\n"
                 f"🔹 **Binance USDT/TRY**: {binance_price} ₺\n"
-                f"🔹 **Google USD/TRY**: {google_price} ₺\n"
-                f"🔹 **Fark**: %{difference:.2f}\n"
+                f"🔹 **Yandex USD/TRY**: {google_price} ₺\n"
+                f"🔹 **Fark**: %{difference:.2f} - **{action}**\n"
             )
 
+            # Telegram'a mesaj gönder
             send_telegram_message(message)
             print("Mesaj gönderildi:", message)
 
+            # Web sayfasında gösterilecek mesajı güncelle
+            last_message = message
+
         except Exception as e:
-            send_telegram_message(f"Hata oluştu: {e}")
+            error_message = f"Hata oluştu: {e}"
+            send_telegram_message(error_message)
             print("Hata:", e)
+
+            # Web sayfasında gösterilecek mesajı güncelle
+            last_message = error_message
 
         # 1 dakika bekle (60 saniye)
         time.sleep(60)
