@@ -4,7 +4,6 @@ atomicwrites==1.4.0
 attrs==25.1.0
 backcall==0.2.0
 backports.weakref==1.0.post1
-clyent==1.2.2
 comm==0.1.3
 conda-repo-cli==1.0.75
 conda-verify==3.4.2
