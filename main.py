@@ -1,5 +1,7 @@
 import requests
 from flask import Flask
+from bs4 import BeautifulSoup
+
 
 # Flask uygulaması oluştur
 app = Flask(__name__)
