@@ -42,36 +42,45 @@ def send_telegram_message(message):
 
 # Binance USDT/TRY fiyatını çekme fonksiyonu (Selenium yok)
 def get_binance_usdt_try():
-    url = "https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        return float(data["price"])
-    return None
+    try:
+        url = "https://api.binance.com/api/v3/ticker/price?symbol=USDTTRY"
+        response = requests.get(url)
+        response.raise_for_status()  # HTTP hatalarını tetikler
+        if response.status_code == 200:
+            data = response.json()
+            return float(data["price"])
+        else:
+            raise ValueError("Binance API'si beklenmedik bir sonuç döndü.")
+    except Exception as e:
+        print(f"Binance API hatası: {e}")
+        return None
 
 # USD/TRY kurunu çekme fonksiyonu
 def get_google_usd_try():
-    url = "https://yandex.com.tr/finance/convert?from=USD&to=TRY&source=main"
-    response = requests.get(url)
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Döviz kuru verisini almak için doğru HTML elementini bulmamız lazım
-        try:
+    try:
+        url = "https://yandex.com.tr/finance/convert?from=USD&to=TRY&source=main"
+        response = requests.get(url)
+        response.raise_for_status()  # HTTP hatalarını tetikler
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            # Döviz kuru verisini almak için doğru HTML elementini bulmamız lazım
             price_element = soup.find("span", class_="PriceValue")
             if price_element:
                 price = float(price_element.text.replace(",", ".").strip())
                 return price
-        except Exception as e:
-            print("Hata oluştu:", e)
-    
-    return None
+            else:
+                raise ValueError("Döviz kuru bilgisi bulunamadı.")
+        else:
+            raise ValueError("Google/USD API'si beklenmedik bir sonuç döndü.")
+    except Exception as e:
+        print(f"Google USD/TRY hatası: {e}")
+        return None
 
 # Fiyatları al, oranı hesapla ve Telegram'a gönder
 import time
 
 def calculate_and_send():
-    global last_message  # Global değişkeni güncelleyeceğiz
+    global last_message  # Global değişkeni güncelle
 
     while True:
         try:
@@ -91,7 +100,7 @@ def calculate_and_send():
             message = (
                 f"📢 **Fiyat Güncellemesi** 📢\n"
                 f"🔹 **Binance USDT/TRY**: {binance_price} ₺\n"
-                f"🔹 **Yandex USD/TRY**: {google_price} ₺\n"
+                f"🔹 **Google USD/TRY**: {google_price} ₺\n"
                 f"🔹 **Fark**: %{difference:.2f} - **{action}**\n"
             )
 
