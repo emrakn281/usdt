@@ -132,7 +132,6 @@ def calculate_and_send():
                 f"🔹 **Yandex USD/TRY**: {google_price} ₺\n"
                 f"🔹 **Fark**: %{difference:.2f}\n"
             )
-            send_telegram_message(message)
             if action != "bekle":
                 send_telegram_message(message)
                 print("Mesaj gönderildi:", message)
