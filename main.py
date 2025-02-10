@@ -119,7 +119,12 @@ def calculate_and_send():
 
             # Farkı hesapla
             difference = ((google_price - binance_price) / google_price) * 100
-            action = "AL" if difference > 0 else "SAT"  # Fark pozitifse "AL", negatifse "SAT"
+
+            # eğer fark 0,2 den büyükse sat 0 dan küçükse al eğer başka bir şey ise bekle
+
+            action = "bekle"
+            if abs(difference) > 0.2:
+                action = "SAT" if difference > 0 else "AL"
 
             message = (
                 f"📢 **{action}** 📢\n"
@@ -128,8 +133,10 @@ def calculate_and_send():
                 f"🔹 **Fark**: %{difference:.2f}\n"
             )
 
-            send_telegram_message(message)
-            print("Mesaj gönderildi:", message)
+            if action != "bekle":
+                send_telegram_message(message)
+                print("Mesaj gönderildi:", message)
+
             last_message = message
 
         except Exception as e:
@@ -138,7 +145,7 @@ def calculate_and_send():
             last_message = message
 
         # 1 dakika bekle (60 saniye)
-        time.sleep(600)
+        time.sleep(60)
 
 # Hesaplama fonksiyonunu çalıştır
 calculate_and_send() 
