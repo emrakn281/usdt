@@ -28,7 +28,7 @@ def home():
 # Flask'i arka planda çalıştırmak için thread kullan
 import threading
 def run_flask():
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=5080)
 
 threading.Thread(target=run_flask, daemon=True).start()
 
