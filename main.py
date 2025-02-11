@@ -96,7 +96,7 @@ def get_google_usd_try():
                 price = float(price_element.text.replace(",", ".").strip())
                 return price
         except Exception as e:
-            send_telegram_message("Hata oluştu:", e)
+            last_message = e
     
     return None
 
@@ -138,7 +138,6 @@ def calculate_and_send():
             last_message = message
 
         except Exception as e:
-            send_telegram_message(f"Hata oluştu: {e}")
             print("Hata:", e)
             last_message = e
 
