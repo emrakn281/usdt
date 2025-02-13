@@ -106,6 +106,7 @@ import time
 
 def calculate_and_send():
     global last_message  # Global değişkeni güncelleyeceğiz
+    global last_action
     while True:
         try:
             binance_price = get_binance_price()
