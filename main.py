@@ -10,6 +10,7 @@ app = Flask(__name__)
 
 last_message = ""
 last_action = ""
+last_action_time=datetime.now()
 
 @app.route('/')
 def home():
@@ -108,6 +109,8 @@ import time
 def calculate_and_send():
     global last_message  # Global değişkeni güncelleyeceğiz
     global last_action
+    global last_action_time
+
     while True:
         try:
             binance_price = get_binance_price()
@@ -140,7 +143,7 @@ def calculate_and_send():
                 f"🔹 **Yandex USD/TRY**: {google_price} ₺\n"
                 f"🔹 **Fark**: %{difference:.2f}\n"
             )
-            if action != "bekle":
+            if action != "BEKLE":
                 if last_action != action:
                     send_telegram_message(message)
                     last_action=action
