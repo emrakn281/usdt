@@ -12,6 +12,7 @@ app = Flask(__name__)
 last_message = ""
 last_action = ""
 last_action_time = None
+status=""
 
 @app.route('/')
 def home():
@@ -68,16 +69,18 @@ def home():
 <body>
 <div class="container">
 <h1>📊 USDT BOT DURUMU 📊</h1>
-<p class="price">💰 Binance USDT/TRY: <strong>{{ message }}</strong></p>
-<p class="price">💱 Google USD/TRY: <strong>{{ l_action }}</strong></p>
+
 <p class="status {{ 'buy' if l_action == 'AL' else 'sell' if l_action == 'SAT' else 'wait' }}">
                    🔔 Durum: <strong>{{ l_action if l_action else 'BEKLE' }}</strong>
 </p>
-<p class="time">🕒 Son Güncelleme: {{ l_time }}</p>
+<p class="price">💰 Binance USDT/TRY: <strong>{{ message }}</strong></p>
+<p class="price">💱 Google USD/TRY: <strong>{{ l_action }}</strong></p>
+
+<p class="time">🕒 Son Mesaj Gönderimi: {{ l_time }}</p>
 </div>
 </body>
 </html>
-   """, message=last_message, l_action=last_action, l_time=last_action_time)
+   """, message=last_message, l_action=status, l_time=last_action_time)
 
 # Flask'i arka planda çalıştırmak için thread kullan
 import threading
@@ -161,7 +164,7 @@ def calculate_and_send():
     global last_message  # Global değişkeni güncelleyeceğiz
     global last_action
     global last_action_time
-
+    global status
     while True:
         try:
             binance_price = get_binance_price()
@@ -181,11 +184,14 @@ def calculate_and_send():
 
             action = "BEKLE"
             if difference < -1.95:
-                action = "SAT" 
+                action = "SAT"
+                status ="SAT"
             elif difference > 0:
                 action = "AL"
+                status ="AL"
             else:
                 action = "BEKLE"
+                status ="BEKLE"
                 last_action=""
 
             message = (
@@ -194,6 +200,14 @@ def calculate_and_send():
                 f"🔹 **Yandex USD/TRY**: {google_price} ₺\n"
                 f"🔹 **Fark**: %{difference:.2f}\n"
             )
+            html_message = (
+                f"📢 **{action}** 📢\n<br>"
+                f"🔹 **Binance USDT/TRY**: {binance_price} ₺\n<br>"
+                f"🔹 **Yandex USD/TRY**: {google_price} ₺\n<br>"
+                f"🔹 **Fark**: %{difference:.2f}\n<br>"
+            )
+            
+            
             suan = datetime.now()
             if last_action_time is None:  # Eğer 'son' değişkeni daha önce atanmadıysa, şu anki zamana eşitle
                 last_action_time = suan
@@ -210,7 +224,7 @@ def calculate_and_send():
                         last_action_time = suan
                         last_action=action
                         print("Mesaj gönderildi:", message)
-            last_message = message
+            last_message = html_message
 
         except Exception as e:
             print("Hata:", e)
