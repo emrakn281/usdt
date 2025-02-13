@@ -13,7 +13,7 @@ last_message = ""
 last_action = ""
 last_action_time = None
 status=""
-fark=None
+fark=""
 USDTTRY= None
 USDTRY= None
 
@@ -207,7 +207,7 @@ def calculate_and_send():
 
             # Farkı hesapla
             difference = ((google_price - binance_price) / google_price) * 100
-            fark = difference
+            fark = str(difference)[:4]
             
             # eğer fark 0,2 den büyükse sat 0 dan küçükse al eğer başka bir şey ise bekle
 
