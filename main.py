@@ -26,60 +26,78 @@ def home():
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>USDT BOT LIVE</title>
+<title>USDT/USD BOTU</title>
 <style>
-               body {
-                   font-family: Arial, sans-serif;
-                   background-color: #121212;
-                   color: #ffffff;
-                   text-align: center;
-                   padding: 20px;
-               }
-               .container {
-                   max-width: 600px;
-                   margin: auto;
-                   background: #1e1e1e;
-                   padding: 20px;
-                   border-radius: 10px;
-                   box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
-               }
-               h1 {
-                   color: #00ffcc;
-                   text-shadow: 2px 2px 5px rgba(0, 255, 204, 0.5);
-               }
-               .price {
-                   font-size: 24px;
-                   font-weight: bold;
-                   color: #ffcc00;
-               }
-               .status {
-                   font-size: 20px;
-                   font-weight: bold;
-                   padding: 10px;
-                   border-radius: 5px;
-                   display: inline-block;
-               }
-               .buy { background-color: #009900; color: white; }
-               .sell { background-color: #cc0000; color: white; }
-               .wait { background-color: #666666; color: white; }
-               .time {
-                   font-size: 16px;
-                   margin-top: 10px;
-                   color: #bbbbbb;
-               }
+       body {
+           font-family: Arial, sans-serif;
+           background-color: #121212;
+           color: #ffffff;
+           text-align: center;
+           padding: 20px;
+       }
+       .container {
+           max-width: 500px;
+           margin: auto;
+           background: #1e1e1e;
+           padding: 20px;
+           border-radius: 10px;
+           box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+       }
+       h1 {
+           color: #00ffcc;
+           text-shadow: 2px 2px 5px rgba(0, 255, 204, 0.5);
+           font-size: 24px;
+       }
+       .price {
+           font-size: 22px;
+           font-weight: bold;
+           color: #ffcc00;
+           margin: 10px 0;
+       }
+       .status {
+           font-size: 22px;
+           font-weight: bold;
+           padding: 10px;
+           border-radius: 5px;
+           display: inline-block;
+           width: 100%;
+           margin: 15px 0;
+       }
+       .buy {
+           background-color: #28a745;
+           color: white;
+       }
+       .sell {
+           background-color: #dc3545;
+           color: white;
+       }
+       .wait {
+           background-color: #ffc107;
+           color: black;
+       }
+       .time {
+           font-size: 16px;
+           margin-top: 10px;
+           color: #bbbbbb;
+       }
+       .divider {
+           height: 2px;
+           background: #444;
+           margin: 15px 0;
+       }
 </style>
 </head>
 <body>
 <div class="container">
 <h1>📊 USDT BOT DURUMU 📊</h1>
-
 <p class="status {{ 'buy' if l_action == 'AL' else 'sell' if l_action == 'SAT' else 'wait' }}">
-                   🔔 Durum: <strong>{{ l_action if l_action else 'BEKLE' }}</strong>
+           🔔 Durum: <strong>{{ l_action if l_action else 'BEKLE' }}</strong>
 </p>
-<p class="price">💰 Binance USDT/TRY: <strong>{{ binance }}</strong></p>
-<p class="price">💱 Yandex USD/TRY: <strong>{{ yandex }}</strong></p>
-<p class="price">💱 Fark: <strong>{{ fark }}</strong></p>
-
+<div class="divider"></div>
+<p class="price">💰 Binance USDT/TRY: <strong>{{ binance }}</strong> ₺</p>
+<p class="price">💱 Yandex USD/TRY: <strong>{{ yandex }}</strong> ₺</p>
+<p class="price">📉 Fark: <strong>{{ fark }}%</strong></p>
+<div class="divider"></div>
 <p class="time">🕒 Son Mesaj Gönderimi: {{ l_time }}</p>
 </div>
 </body>
@@ -189,7 +207,7 @@ def calculate_and_send():
 
             # Farkı hesapla
             difference = ((google_price - binance_price) / google_price) * 100
-            fark = difference
+            fark = difference:.2f
 
             # eğer fark 0,2 den büyükse sat 0 dan küçükse al eğer başka bir şey ise bekle
 
