@@ -96,7 +96,7 @@ def home():
 <div class="divider"></div>
 <p class="price">💰 Binance USDT/TRY: <strong>{{ binance }}</strong> ₺</p>
 <p class="price">💱 Yandex USD/TRY: <strong>{{ yandex }}</strong> ₺</p>
-<p class="price">📉 Fark: <strong>{{ fark }}%</strong></p>
+<p class="price">📉 Fark: <strong>{{ difference:.2f }}%</strong></p>
 <div class="divider"></div>
 <p class="time">🕒 Son Mesaj Gönderimi: {{ l_time }}</p>
 </div>
@@ -207,8 +207,8 @@ def calculate_and_send():
 
             # Farkı hesapla
             difference = ((google_price - binance_price) / google_price) * 100
-            fark = difference:.2f
-
+            fark = difference
+            
             # eğer fark 0,2 den büyükse sat 0 dan küçükse al eğer başka bir şey ise bekle
 
             action = "BEKLE"
