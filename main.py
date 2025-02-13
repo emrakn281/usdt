@@ -139,7 +139,7 @@ def calculate_and_send():
                 f"🔹 **Fark**: %{difference:.2f}\n"
             )
             if action != "bekle":
-                if last_action != action
+                if last_action != action:
                     send_telegram_message(message)
                     last_action=action
                     print("Mesaj gönderildi:", message)
