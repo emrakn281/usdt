@@ -3,6 +3,7 @@ from flask import Flask, render_template_string
 from bs4 import BeautifulSoup
 import websocket
 import json
+from datetime import datetime, timedelta
 
 binance_price = None
 # Flask uygulaması oluştur
@@ -10,7 +11,7 @@ app = Flask(__name__)
 
 last_message = ""
 last_action = ""
-last_action_time=datetime.now()
+last_action_time = None
 
 @app.route('/')
 def home():
@@ -143,11 +144,22 @@ def calculate_and_send():
                 f"🔹 **Yandex USD/TRY**: {google_price} ₺\n"
                 f"🔹 **Fark**: %{difference:.2f}\n"
             )
+            suan = datetime.now()
+            if son is None:  # Eğer 'son' değişkeni daha önce atanmadıysa, şu anki zamana eşitle
+                last_action_time = suan
             if action != "BEKLE":
                 if last_action != action:
                     send_telegram_message(message)
+                    last_action_time = şuan
                     last_action=action
                     print("Mesaj gönderildi:", message)
+                else:
+                    fark = suan - last_action_time
+                    if fark>= timedelta(minutes=10):
+                        send_telegram_message(message)
+                        last_action_time = şuan
+                        last_action=action
+                        print("Mesaj gönderildi:", message)
             last_message = message
 
         except Exception as e:
