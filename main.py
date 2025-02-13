@@ -123,6 +123,7 @@ def calculate_and_send():
             # eğer fark 0,2 den büyükse sat 0 dan küçükse al eğer başka bir şey ise bekle
 
             action = "bekle"
+            send_telegram_message(difference)
             if difference < -1.95:
                 action = "SAT" if difference > 0 else "AL"
 
