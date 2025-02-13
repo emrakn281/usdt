@@ -9,6 +9,7 @@ binance_price = None
 app = Flask(__name__)
 
 last_message = ""
+last_action = ""
 
 @app.route('/')
 def home():
@@ -129,6 +130,7 @@ def calculate_and_send():
                 action = "AL"
             else:
                 action = "BEKLE"
+                last_action=""
 
             message = (
                 f"📢 **{action}** 📢\n"
@@ -137,8 +139,10 @@ def calculate_and_send():
                 f"🔹 **Fark**: %{difference:.2f}\n"
             )
             if action != "bekle":
-                send_telegram_message(message)
-                print("Mesaj gönderildi:", message)
+                if last_action != action
+                    send_telegram_message(message)
+                    last_action=action
+                    print("Mesaj gönderildi:", message)
             last_message = message
 
         except Exception as e:
