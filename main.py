@@ -25,9 +25,10 @@ def home():
                 <h1>FİYATLAR!</h1>
                 <p>{{ message }}</p>
                 <p>{{ l_action }}</p>
+                <p>{{ l_time }}</p>
             </body>
         </html>
-    """, message=last_message, l_action=last_action)
+    """, message=last_message, l_action=last_action, l_time=last_action_time)
 
 # Flask'i arka planda çalıştırmak için thread kullan
 import threading
@@ -145,7 +146,7 @@ def calculate_and_send():
                 f"🔹 **Fark**: %{difference:.2f}\n"
             )
             suan = datetime.now()
-            if son is None:  # Eğer 'son' değişkeni daha önce atanmadıysa, şu anki zamana eşitle
+            if last_action_time is None:  # Eğer 'son' değişkeni daha önce atanmadıysa, şu anki zamana eşitle
                 last_action_time = suan
             if action != "BEKLE":
                 if last_action != action:
