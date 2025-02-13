@@ -151,14 +151,14 @@ def calculate_and_send():
             if action != "BEKLE":
                 if last_action != action:
                     send_telegram_message(message)
-                    last_action_time = şuan
+                    last_action_time = suan
                     last_action=action
                     print("Mesaj gönderildi:", message)
                 else:
                     fark = suan - last_action_time
                     if fark>= timedelta(minutes=10):
                         send_telegram_message(message)
-                        last_action_time = şuan
+                        last_action_time = suan
                         last_action=action
                         print("Mesaj gönderildi:", message)
             last_message = message
