@@ -96,7 +96,7 @@ def home():
 <div class="divider"></div>
 <p class="price">💰 Binance USDT/TRY: <strong>{{ binance }}</strong> ₺</p>
 <p class="price">💱 Yandex USD/TRY: <strong>{{ yandex }}</strong> ₺</p>
-<p class="price">📉 Fark: <strong>{{ difference:.2f }}%</strong></p>
+<p class="price">📉 Fark: <strong>%{{ difference }}</strong></p>
 <div class="divider"></div>
 <p class="time">🕒 Son Mesaj Gönderimi: {{ l_time }}</p>
 </div>
