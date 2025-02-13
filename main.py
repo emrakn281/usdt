@@ -22,9 +22,10 @@ def home():
             <body>
                 <h1>FİYATLAR!</h1>
                 <p>{{ message }}</p>
+                <p>{{ l_action }}</p>
             </body>
         </html>
-    """, message=last_message)
+    """, message=last_message, l_action=last_action)
 
 # Flask'i arka planda çalıştırmak için thread kullan
 import threading
