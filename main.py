@@ -233,7 +233,6 @@ def calculate_and_send():
             
             
             suan = datetime.now()+timedelta(hours=3)
-            suan = suan.strftime("%Y-%m-%d %H:%M:%S")
             if last_action_time is None:  # Eğer 'son' değişkeni daha önce atanmadıysa, şu anki zamana eşitle
                 last_action_time = suan
             if action != "BEKLE":
