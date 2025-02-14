@@ -189,7 +189,7 @@ def calculate_and_send():
                action = "AL"
                status = "AL"
            timestamp = datetime.now().strftime("%H:%M:%S")
-           update_price_history(timestamp, binance_price)
+           update_price_history(timestamp, difference)
            message = f"📢 {action} 📢\n🔹 Binance: {binance_price} ₺\n🔹 Yandex: {google_price} ₺\n🔹 Fark: %{difference:.2f}"
            if action != "BEKLE" and last_action != action:
                print("Mesaj gönderildi:", message)
