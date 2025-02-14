@@ -215,7 +215,7 @@ def chart_data():
 # Flask'i arka planda çalıştırmak için thread kullan
 import threading
 def run_flask():
-    app.run(host='0.0.0.0', port=000)
+    app.run(host='0.0.0.0', port=3000)
 
 threading.Thread(target=run_flask, daemon=True).start()
 
