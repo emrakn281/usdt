@@ -105,12 +105,10 @@ def home():
 <p class="price">📉 Fark: <strong>%{{ oran }}</strong></p>
 <div class="divider"></div>
 <p class="time">🕒 Son Mesaj Gönderimi: {{ l_time }}</p>
-<p class="time">🕒 Veriler: {{ test }}</p>
 <canvas id="priceChart"></canvas>
 </div>
 <script>
    async function updateChart() {
-       console.log("Grafik güncelleniyor...");
        const response = await fetch('/chart-data');
        const data = await response.json();
        priceChart.data.labels = data.labels;
@@ -123,7 +121,7 @@ def home():
        data: {
            labels: [],
            datasets: [{
-               label: 'USDT/TRY Fiyatı',
+               label: 'Oran',
                data: [],
                borderColor: '#ffcc00',
                backgroundColor: 'rgba(255, 204, 0, 0.2)',
@@ -138,11 +136,11 @@ def home():
            }
        }
    });
-   setInterval(updateChart, 60);
+   setInterval(updateChart, 60000);
 </script>
 </body>
 </html>
-""", l_action=status, l_time=last_action_time, binance=USDTTRY, yandex=USDTRY, oran=oran,test=price_history)
+""", l_action=status, l_time=last_action_time, binance=USDTTRY, yandex=USDTRY, oran=oran)
 @app.route('/chart-data')
 def chart_data():
    return jsonify({
@@ -244,20 +242,17 @@ def calculate_and_send():
 
             google_price = get_google_usd_try()
             USDTRY = google_price
-            
             print(f"Binance USDT/TRY: {binance_price}")
             print(f"Yandex USD/TRY: {google_price}")
-
             if binance_price is None or google_price is None:
                 raise ValueError("Fiyat bilgileri alınamadı!")
 
             # Farkı hesapla
             difference = ((google_price - binance_price) / google_price) * 100
             oran = str(difference)[:4]
-            timestamp = datetime.now().strftime("%H:%M:%S")+timedelta(hours=3)
+            timestamp = (datetime.now()+timedelta(hours=3)).strftime("%d-%m-%Y %H:%M:%S")
             update_price_history(timestamp, difference)
             # eğer fark 0,2 den büyükse sat 0 dan küçükse al eğer başka bir şey ise bekle
-
             action = "BEKLE"
             if difference < -1.95:
                 action = "SAT"
@@ -269,7 +264,6 @@ def calculate_and_send():
                 action = "BEKLE"
                 status ="BEKLE"
                 last_action=""
-
             message = (
                 f"📢 **{action}** 📢\n"
                 f"🔹 **Binance USDT/TRY**: {binance_price} ₺\n"
@@ -278,11 +272,11 @@ def calculate_and_send():
             )
             
             
-            
             suan = datetime.now()+timedelta(hours=3)
             if last_action_time is None:  # Eğer 'son' değişkeni daha önce atanmadıysa, şu anki zamana eşitle
                 last_action_time = suan
             if action != "BEKLE":
+                print(7)
                 if last_action != action:
                     send_telegram_message(message)
                     last_action_time = suan
