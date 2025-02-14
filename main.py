@@ -117,29 +117,43 @@ def home():
    }
    const ctx = document.getElementById('priceChart').getContext('2d');
    const priceChart = new Chart(ctx, {
-       type: 'line',
-       data: {
-           labels: [],
-           datasets: [{
-               label: 'Oran',
-               data: [],
-               borderColor: '#ffcc00',
-               backgroundColor: 'rgba(255, 204, 0, 0.2)',
-               borderWidth: 2,
-               fill: true
-           }]
-       },
-       options: {
-           scales: {
+    type: 'line',
+    data: {
+        labels: [],  // Saatler burada tutuluyor ama gösterilmeyecek
+        datasets: [{
+            label: 'USDT/TRY Fiyatı',
+            data: [],
+            borderColor: '#ffcc00',
+            backgroundColor: 'rgba(255, 204, 0, 0.2)',
+            borderWidth: 2,
+            fill: true
+        }]
+    },
+    options: {
+        scales: {
             x: {
-                display: true
+                display: true,  // Eksen çizgisi gösterilsin ama saatler gözükmesin
+                ticks: {
+                    display: false  // Saatleri gizle
+                }
             },
             y: {
                 display: true
             }
-       }
-   });
-   setInterval(updateChart, 60000);
+        },
+        plugins: {
+            tooltip: {
+                enabled: true,  // Üzerine gelindiğinde saat gösterilsin
+                callbacks: {
+                    title: function(tooltipItems) {
+                        return tooltipItems[0].label;  // Saat bilgisini göster
+                    }
+                }
+            }
+        }
+    }
+});
+updateChart();
 </script>
 </body>
 </html>
@@ -154,7 +168,7 @@ def chart_data():
 # Flask'i arka planda çalıştırmak için thread kullan
 import threading
 def run_flask():
-    app.run(host='0.0.0.0', port=5080)
+    app.run(host='0.0.0.0', port=3091)
 
 threading.Thread(target=run_flask, daemon=True).start()
 
@@ -291,6 +305,7 @@ def calculate_and_send():
                     if fark>= timedelta(minutes=10):
                         send_telegram_message(message)
                         last_action_time = suan
+                        last_action_time = last_action_time.strftime("%Y-%m-%d %H:%M:%S")
                         last_action=action
                         print("Mesaj gönderildi:", message)
             last_message = message
@@ -303,4 +318,4 @@ def calculate_and_send():
         time.sleep(60)
 
 # Hesaplama fonksiyonunu çalıştır
-calculate_and_send() 
+calculate_and_send()
