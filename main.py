@@ -13,7 +13,7 @@ last_message = ""
 last_action = ""
 last_action_time = None
 status=""
-fark=""
+oran=""
 USDTTRY= None
 USDTRY= None
 
@@ -96,13 +96,13 @@ def home():
 <div class="divider"></div>
 <p class="price">💰 Binance USDT/TRY: <strong>{{ binance }}</strong> ₺</p>
 <p class="price">💱 Yandex USD/TRY: <strong>{{ yandex }}</strong> ₺</p>
-<p class="price">📉 Fark: <strong>%{{ fark }}</strong></p>
+<p class="price">📉 Fark: <strong>%{{ oran }}</strong></p>
 <div class="divider"></div>
 <p class="time">🕒 Son Mesaj Gönderimi: {{ l_time }}</p>
 </div>
 </body>
 </html>
-   """, l_action=status, l_time=last_action_time,binance=USDTTRY,yandex=USDTRY,fark=fark)
+   """, l_action=status, l_time=last_action_time,binance=USDTTRY,yandex=USDTRY,oran=oran)
 
 # Flask'i arka planda çalıştırmak için thread kullan
 import threading
@@ -187,7 +187,7 @@ def calculate_and_send():
     global last_action
     global last_action_time
     global status
-    global fark
+    global oran
     global USDTTRY
     global USDTRY
     
@@ -207,7 +207,7 @@ def calculate_and_send():
 
             # Farkı hesapla
             difference = ((google_price - binance_price) / google_price) * 100
-            fark = str(difference)[:4]
+            oran = str(difference)[:4]
             
             # eğer fark 0,2 den büyükse sat 0 dan küçükse al eğer başka bir şey ise bekle
 
@@ -232,7 +232,8 @@ def calculate_and_send():
             
             
             
-            suan = datetime.now()
+            suan = datetime.now()+timedelta(hours=3)
+            suan = suan.strftime("%Y-%m-%d %H:%M:%S")
             if last_action_time is None:  # Eğer 'son' değişkeni daha önce atanmadıysa, şu anki zamana eşitle
                 last_action_time = suan
             if action != "BEKLE":
