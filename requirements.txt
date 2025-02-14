@@ -4,3 +4,4 @@ gunicorn
 beautifulsoup4
 Flask
 requests
+jsonify
