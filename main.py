@@ -105,10 +105,12 @@ def home():
 <p class="price">📉 Fark: <strong>%{{ oran }}</strong></p>
 <div class="divider"></div>
 <p class="time">🕒 Son Mesaj Gönderimi: {{ l_time }}</p>
+<p class="time">🕒 Veriler: {{ test }}</p>
 <canvas id="priceChart"></canvas>
 </div>
 <script>
    async function updateChart() {
+       console.log("Grafik güncelleniyor...");
        const response = await fetch('/chart-data');
        const data = await response.json();
        priceChart.data.labels = data.labels;
@@ -140,7 +142,7 @@ def home():
 </script>
 </body>
 </html>
-""", l_action=status, l_time=last_action_time, binance=USDTTRY, yandex=USDTRY, oran=oran)
+""", l_action=status, l_time=last_action_time, binance=USDTTRY, yandex=USDTRY, oran=oran,test=price_history)
 @app.route('/chart-data')
 def chart_data():
    return jsonify({
