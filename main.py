@@ -18,10 +18,16 @@ USDTTRY= None
 USDTRY= None
 # Fiyat geçmişini saklamak için liste
 price_history = []
-def update_price_history(timestamp, price):
-   if len(price_history) >= 1000:  # Maksimum 50 veri noktası tut
-       price_history.pop(0)
-   price_history.append({"time": timestamp, "price": price})
+def update_price_history(timestamp, binance, yandex, difference):
+    if len(price_history) >= 1000:
+        price_history.pop(0)
+    price_history.append({
+        "time": timestamp,
+        "binance": binance,
+        "yandex": yandex,
+        "difference": difference
+    })
+
 @app.route('/')
 def home():
     # Web sitesinde gösterilecek mesaj
@@ -105,70 +111,111 @@ def home():
 <p class="price">📉 Fark: <strong>%{{ oran }}</strong></p>
 <div class="divider"></div>
 <p class="time">🕒 Son Mesaj Gönderimi: {{ l_time }}</p>
+
+<canvas id="differenceChart"></canvas>
 <canvas id="priceChart"></canvas>
+
 </div>
+
 <script>
-   async function updateChart() {
+   async function updateCharts() {
        const response = await fetch('/chart-data');
        const data = await response.json();
+
+       // Binance ve Yandex için fiyat grafiği
        priceChart.data.labels = data.labels;
-       priceChart.data.datasets[0].data = data.values;
+       priceChart.data.datasets[0].data = data.binancePrices;
+       priceChart.data.datasets[1].data = data.yandexPrices;
        priceChart.update();
+
+       // Oran (Fark) grafiği
+       differenceChart.data.labels = data.labels;
+       differenceChart.data.datasets[0].data = data.differences;
+       differenceChart.update();
    }
-   const ctx = document.getElementById('priceChart').getContext('2d');
-   const priceChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: [],  // Saatler burada tutuluyor ama gösterilmeyecek
-        datasets: [{
-            label: 'USDT/TRY Fiyatı',
-            data: [],
-            borderColor: '#ffcc00',
-            backgroundColor: 'rgba(255, 204, 0, 0.2)',
-            borderWidth: 2,
-            fill: true
-        }]
-    },
-    options: {
-        scales: {
-            x: {
-                display: true,  // Eksen çizgisi gösterilsin ama saatler gözükmesin
-                ticks: {
-                    display: false  // Saatleri gizle
-                }
-            },
-            y: {
-                display: true
-            }
-        },
-        plugins: {
-            tooltip: {
-                enabled: true,  // Üzerine gelindiğinde saat gösterilsin
-                callbacks: {
-                    title: function(tooltipItems) {
-                        return tooltipItems[0].label;  // Saat bilgisini göster
-                    }
-                }
-            }
-        }
-    }
-});
-updateChart();
+
+   const ctx1 = document.getElementById('priceChart').getContext('2d');
+   const priceChart = new Chart(ctx1, {
+       type: 'line',
+       data: {
+           labels: [],
+           datasets: [
+               {
+                   label: 'Binance USDT/TRY',
+                   data: [],
+                   borderColor: '#ffcc00',
+                   backgroundColor: 'rgba(255, 204, 0, 0.2)',
+                   borderWidth: 2,
+                   fill: true
+               },
+               {
+                   label: 'Yandex USD/TRY',
+                   data: [],
+                   borderColor: '#00ccff',
+                   backgroundColor: 'rgba(0, 204, 255, 0.2)',
+                   borderWidth: 2,
+                   fill: true
+               }
+           ]
+       },
+       options: {
+           scales: {
+               x: { ticks: { display: false } },
+               y: { display: true }
+           },
+           plugins: {
+               tooltip: { enabled: true }
+           }
+       }
+   });
+
+   const ctx2 = document.getElementById('differenceChart').getContext('2d');
+   const differenceChart = new Chart(ctx2, {
+       type: 'line',
+       data: {
+           labels: [],
+           datasets: [
+               {
+                   label: 'Fark (%)',
+                   data: [],
+                   borderColor: '#ff4444',
+                   backgroundColor: 'rgba(255, 68, 68, 0.2)',
+                   borderWidth: 2,
+                   fill: true
+               }
+           ]
+       },
+       options: {
+           scales: {
+               x: { ticks: { display: false } },
+               y: { display: true }
+           },
+           plugins: {
+               tooltip: { enabled: true }
+           }
+       }
+   });
+
+   setInterval(updateCharts, 60);
 </script>
+
 </body>
 </html>
 """, l_action=status, l_time=last_action_time, binance=USDTTRY, yandex=USDTRY, oran=oran)
 @app.route('/chart-data')
 def chart_data():
-   return jsonify({
-       "labels": [entry["time"] for entry in price_history],
-       "values": [entry["price"] for entry in price_history]
-   })
+    return jsonify({
+        "labels": [entry["time"] for entry in price_history],
+        "binancePrices": [entry["binance"] for entry in price_history],
+        "yandexPrices": [entry["yandex"] for entry in price_history],
+        "differences": [entry["difference"] for entry in price_history]
+    })
+
 
 # Flask'i arka planda çalıştırmak için thread kullan
 import threading
 def run_flask():
-    app.run(host='0.0.0.0', port=3091)
+    app.run(host='0.0.0.0', port=000)
 
 threading.Thread(target=run_flask, daemon=True).start()
 
@@ -268,7 +315,7 @@ def calculate_and_send():
             difference = ((google_price - binance_price) / google_price) * 100
             oran = str(difference)[:4]
             timestamp = (datetime.now()+timedelta(hours=3)).strftime("%d-%m-%Y %H:%M:%S")
-            update_price_history(timestamp, difference)
+            update_price_history(timestamp,binance_price, google_price, difference)
             # eğer fark 0,2 den büyükse sat 0 dan küçükse al eğer başka bir şey ise bekle
             action = "BEKLE"
             if difference < -1.95:
