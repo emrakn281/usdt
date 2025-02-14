@@ -196,7 +196,7 @@ def home():
        }
    });
 
-   setInterval(updateCharts, 60);
+updateCharts();
 </script>
 
 </body>
