@@ -239,6 +239,7 @@ def calculate_and_send():
                 if last_action != action:
                     send_telegram_message(message)
                     last_action_time = suan
+                    last_action_time = last_action_time.strftime("%Y-%m-%d %H:%M:%S")
                     last_action=action
                     print("Mesaj gönderildi:", message)
                 else:
