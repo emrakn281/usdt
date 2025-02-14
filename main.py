@@ -131,9 +131,15 @@ def home():
        },
        options: {
            scales: {
-               x: { display: true },
-               y: { display: true }
-           }
+            x: {
+                display: true,  // Eksen çizgisi gösterilsin ama saatler gözükmesin
+                ticks: {
+                    display: false  // Saatleri gizle
+                }
+            },
+            y: {
+                display: true
+            }
        }
    });
    setInterval(updateChart, 60000);
