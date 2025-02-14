@@ -1,5 +1,5 @@
 import requests
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, jsonify
 from bs4 import BeautifulSoup
 import websocket
 import json
@@ -252,6 +252,7 @@ def calculate_and_send():
             # Farkı hesapla
             difference = ((google_price - binance_price) / google_price) * 100
             oran = str(difference)[:4]
+            timestamp = datetime.now().strftime("%H:%M:%S")+timedelta(hours=3)
             update_price_history(timestamp, difference)
             # eğer fark 0,2 den büyükse sat 0 dan küçükse al eğer başka bir şey ise bekle
 
