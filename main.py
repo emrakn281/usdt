@@ -16,10 +16,13 @@ status=""
 oran=""
 USDTTRY= None
 USDTRY= None
-# Fiyat geçmişini saklamak için liste
+last_chart_update = None
 price_history = []
+
+
+
 def update_price_history(timestamp, binance, yandex, difference):
-    if len(price_history) >= 1000:
+    if len(price_history) >= 100:
         price_history.pop(0)
     price_history.append({
         "time": timestamp,
@@ -266,7 +269,7 @@ def get_binance_price():
 
 # Fiyatı al
 
-# Binance USDT/TRY fiyatını çekme fonksiyonu (Selenium yok)
+# Binance USDT/TRY fiyatını çekme fonksiyonu 
 
 
 # USD/TRY kurunu çekme fonksiyonu
@@ -315,6 +318,11 @@ def calculate_and_send():
             difference = ((google_price - binance_price) / google_price) * 100
             oran = str(difference)[:4]
             timestamp = (datetime.now()+timedelta(hours=3)).strftime("%d-%m-%Y %H:%M:%S")
+            
+            if last_chart_update is None or (datetime.now() - last_chart_update) >= timedelta(minutes=15):
+                update_price_history(timestamp, binance_price, google_price, difference)
+                last_chart_update = datetime.now()  # Zaman damgasını güncelle
+            
             update_price_history(timestamp,binance_price, google_price, difference)
             # eğer fark 0,2 den büyükse sat 0 dan küçükse al eğer başka bir şey ise bekle
             action = "BEKLE"
