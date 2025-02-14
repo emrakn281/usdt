@@ -301,6 +301,8 @@ def calculate_and_send():
     global oran
     global USDTTRY
     global USDTRY
+    global last_chart_update
+
     
     while True:
         try:
