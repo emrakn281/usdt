@@ -351,7 +351,6 @@ def calculate_and_send():
             if last_action_time is None:  # Eğer 'son' değişkeni daha önce atanmadıysa, şu anki zamana eşitle
                 last_action_time = suan
             if action != "BEKLE":
-                print(7)
                 if last_action != action:
                     send_telegram_message(message)
                     last_action_time = suan
