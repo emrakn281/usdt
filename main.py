@@ -12,6 +12,7 @@ app = Flask(__name__)
 last_message = ""
 last_action = ""
 last_action_time = None
+show_time = None
 status=""
 oran=""
 USDTTRY= None
@@ -204,7 +205,7 @@ updateCharts();
 
 </body>
 </html>
-""", l_action=status, l_time=last_action_time, binance=USDTTRY, yandex=USDTRY, oran=oran)
+""", l_action=status, l_time=show_time, binance=USDTTRY, yandex=USDTRY, oran=oran)
 @app.route('/chart-data')
 def chart_data():
     return jsonify({
@@ -297,6 +298,7 @@ def calculate_and_send():
     global last_message  # Global değişkeni güncelleyeceğiz
     global last_action
     global last_action_time
+    global show_time
     global status
     global oran
     global USDTTRY
@@ -353,7 +355,7 @@ def calculate_and_send():
                 if last_action != action:
                     send_telegram_message(message)
                     last_action_time = suan
-                    last_action_time = last_action_time.strftime("%Y-%m-%d %H:%M:%S")
+                    show_time = last_action_time.strftime("%Y-%m-%d %H:%M:%S")
                     last_action=action
                     print("Mesaj gönderildi:", message)
                 else:
@@ -361,7 +363,7 @@ def calculate_and_send():
                     if fark>= timedelta(minutes=10):
                         send_telegram_message(message)
                         last_action_time = suan
-                        last_action_time = last_action_time.strftime("%Y-%m-%d %H:%M:%S")
+                        show_time = last_action_time.strftime("%Y-%m-%d %H:%M:%S")
                         last_action=action
                         print("Mesaj gönderildi:", message)
             last_message = message
