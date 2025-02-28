@@ -129,9 +129,7 @@ def home():
 <p class="price">💱 Yandex USD/TRY: <strong>{{ yandex }}</strong> ₺</p>
 <p class="price">📉 Fark: <strong>%{{ oran }}</strong></p>
 
-<p class="price">💰 Mynet Gram Altın: <strong>{{ gramaltin }}</strong> ₺</p>
-<p class="price">💰 Mynet S1 (x100): <strong>{{ mynets1 }}</strong> ₺</p>
-<p class="price">📉 Fark: <strong>%{{ altinoran }}</strong></p>
+
 
 
 
@@ -141,8 +139,12 @@ def home():
 
 <canvas id="differenceChart"></canvas>
 <canvas id="priceChart"></canvas>
-<canvas id="goldChart"></canvas>
+<h1>📊 ALTIN BOT DURUMU 📊</h1>
+<p class="price">💰 Mynet Gram Altın: <strong>{{ gramaltin }}</strong> ₺</p>
+<p class="price">💰 Mynet S1 (x100): <strong>{{ mynets1 }}</strong> ₺</p>
+<p class="price">📉 Fark: <strong>%{{ altinoran }}</strong></p>
 <canvas id="goldDifferenceChart"></canvas>
+<canvas id="goldChart"></canvas>
 
 </div>
 
