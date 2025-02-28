@@ -441,6 +441,7 @@ def calculate_and_send():
             # **Telegram mesajı gönderme mantığı**
             suan = datetime.now() + timedelta(hours=3)
             if last_message_time is None or (datetime.now() - last_message_time) >= timedelta(hours=2):
+                last_message_time = datetime.now()
                 send_telegram_message(message)
                 last_action_time = suan
                 show_time = last_action_time.strftime("%Y-%m-%d %H:%M:%S")
