@@ -436,7 +436,6 @@ def calculate_and_send():
                 f"🔹 **Yandex USD/TRY**: {USDTRY} ₺\n"
                 f"🔹 **Fark (USDT)**: %{difference_usdt:.2f}\n"
                 "----------------------------------\n"
-                f"📢 **{action_gold}** 📢\n"
                 f"🔸 **Gram Altın**: {gramaltin} ₺\n"
                 f"🔸 **S1 (x100)**: {mynets1} ₺\n"
                 f"🔸 **Fark (Altın vs S1)**: %{difference_gold:.2f}"
