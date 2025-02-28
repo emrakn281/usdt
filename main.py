@@ -389,7 +389,7 @@ import time
 
 def calculate_and_send():
     global last_action, last_action_time, show_time, status, oran, USDTTRY, USDTRY, gramaltin, mynets1
-    global last_message, last_message_time
+    global last_message, last_message_time, altinoran
     while True:
         try:
             # Binance ve Yandex fiyatlarını al
@@ -409,6 +409,7 @@ def calculate_and_send():
             oran = str(difference_usdt)[:4]
             # Altın - S1 farkını hesapla
             difference_gold = ((s1_price - gold_price) / s1_price) * 100
+            altinoran = difference_gold
             timestamp = (datetime.now() + timedelta(hours=3)).strftime("%d-%m-%Y %H:%M:%S")
             # Grafik verilerini güncelle (Her 15 dakikada bir)
             update_price_history(timestamp, USDTTRY, USDTRY, difference_usdt)
