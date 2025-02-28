@@ -435,8 +435,8 @@ def calculate_and_send():
                 f"🔹 **Fark (USDT)**: %{difference_usdt:.2f}\n"
                 "----------------------------------\n"
                 f"📢 **{action_gold}** 📢\n"
-                f"🔸 **Gram Altın**: {gold_price} ₺\n"
-                f"🔸 **S1 (x100)**: {s1_price} ₺\n"
+                f"🔸 **Gram Altın**: {gramaltin} ₺\n"
+                f"🔸 **S1 (x100)**: {mynets1} ₺\n"
                 f"🔸 **Fark (Altın vs S1)**: %{difference_gold:.2f}"
             )
             # **Telegram mesajı gönderme mantığı**
