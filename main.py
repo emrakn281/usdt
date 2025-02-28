@@ -17,9 +17,13 @@ status=""
 oran=""
 USDTTRY= None
 USDTRY= None
+altinoran=""
+mynets1= None
+gramaltin = None
 last_chart_update = None
 price_history = []
 altin_history = []
+last_message_time = None  # Son mesajın gönderildiği zaman
 
 
 
@@ -124,6 +128,14 @@ def home():
 <p class="price">💰 Binance USDT/TRY: <strong>{{ binance }}</strong> ₺</p>
 <p class="price">💱 Yandex USD/TRY: <strong>{{ yandex }}</strong> ₺</p>
 <p class="price">📉 Fark: <strong>%{{ oran }}</strong></p>
+
+<p class="price">💰 Mynet Gram Altın: <strong>{{ gramaltin }}</strong> ₺</p>
+<p class="price">💰 Mynet S1 (x100): <strong>{{ mynets1 }}</strong> ₺</p>
+<p class="price">📉 Fark: <strong>%{{ altinoran }}</strong></p>
+
+
+
+
 <div class="divider"></div>
 <p class="time">🕒 Son Mesaj Gönderimi: {{ l_time }}</p>
 
@@ -254,7 +266,7 @@ updateCharts();
 
 </body>
 </html>
-""", l_action=status, l_time=show_time, binance=USDTTRY, yandex=USDTRY, oran=oran)
+""", l_action=status, l_time=show_time, binance=USDTTRY, yandex=USDTRY, oran=oran, gramaltin=gramaltin, mynets1=mynets1,altinoran=altinoran )
 @app.route('/chart-data')
 def chart_data():
     return jsonify({
@@ -376,8 +388,8 @@ def get_gold_price():
 import time
 
 def calculate_and_send():
-    global last_action, last_action_time, show_time, status, oran, USDTTRY, USDTRY
-    global last_chart_update, last_message
+    global last_action, last_action_time, show_time, status, oran, USDTTRY, USDTRY, gramaltin, mynets1
+    global last_message, last_message_time
     while True:
         try:
             # Binance ve Yandex fiyatlarını al
@@ -385,11 +397,9 @@ def calculate_and_send():
             USDTRY = get_google_usd_try()
             # Altın ve S1 fiyatlarını al
             gold_price = get_gold_price()
+            gramaltin = gold_price
             s1_price = get_s1_price()
-            print(f"Binance USDT/TRY: {USDTTRY}")
-            print(f"Yandex USD/TRY: {USDTRY}")
-            print(f"Gram Altın: {gold_price}")
-            print(f"S1 (x100): {s1_price}")
+            mynets1=s1_price
 
             # Fiyatlar alındı mı kontrol et
             if None in [USDTTRY, USDTRY, gold_price, s1_price]:
@@ -398,13 +408,12 @@ def calculate_and_send():
             difference_usdt = ((USDTRY - USDTTRY) / USDTRY) * 100
             oran = str(difference_usdt)[:4]
             # Altın - S1 farkını hesapla
-            difference_gold = ((gold_price - s1_price) / gold_price) * 100
+            difference_gold = ((s1_price - gold_price) / s1_price) * 100
             timestamp = (datetime.now() + timedelta(hours=3)).strftime("%d-%m-%Y %H:%M:%S")
             # Grafik verilerini güncelle (Her 15 dakikada bir)
-            if last_chart_update is None or (datetime.now() - last_chart_update) >= timedelta(minutes=15):
-                update_price_history(timestamp, USDTTRY, USDTRY, difference_usdt)
-                update_altin_history(timestamp, gold_price, s1_price, difference_gold)
-                last_chart_update = datetime.now()
+            update_price_history(timestamp, USDTTRY, USDTRY, difference_usdt)
+            update_altin_history(timestamp, gold_price, s1_price, difference_gold)
+            
             # **Dolar ve USDT için AL/SAT BEKLE kararı**
             action_usdt = "BEKLE"
             if difference_usdt < -1.95:
@@ -419,18 +428,19 @@ def calculate_and_send():
                 action_gold = "AL"
             # Telegram mesajı oluştur
             message = (
-                f"📢 **{action_usdt} - {action_gold}** 📢\n"
+                f"📢 **{action_usdt}** 📢\n"
                 f"🔹 **Binance USDT/TRY**: {USDTTRY} ₺\n"
                 f"🔹 **Yandex USD/TRY**: {USDTRY} ₺\n"
                 f"🔹 **Fark (USDT)**: %{difference_usdt:.2f}\n"
                 "----------------------------------\n"
+                f"📢 **{action_gold}** 📢\n"
                 f"🔸 **Gram Altın**: {gold_price} ₺\n"
                 f"🔸 **S1 (x100)**: {s1_price} ₺\n"
                 f"🔸 **Fark (Altın vs S1)**: %{difference_gold:.2f}"
             )
             # **Telegram mesajı gönderme mantığı**
             suan = datetime.now() + timedelta(hours=3)
-            if action_usdt != "BEKLE" or action_gold != "BEKLE":  # Eğer biri bile "BEKLE" değilse mesaj at
+            if last_message_time is None or (datetime.now() - last_message_time) >= timedelta(hours=2):
                 send_telegram_message(message)
                 last_action_time = suan
                 show_time = last_action_time.strftime("%Y-%m-%d %H:%M:%S")
@@ -440,6 +450,6 @@ def calculate_and_send():
         except Exception as e:
             print("Hata:", e)
             last_message = str(e)
-        time.sleep(60)  # 30 dakika bekle
+        time.sleep(900)  # 15 dakika bekle
 # Hesaplama fonksiyonunu çalıştır
 calculate_and_send()
