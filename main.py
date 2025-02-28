@@ -19,6 +19,7 @@ USDTTRY= None
 USDTRY= None
 last_chart_update = None
 price_history = []
+altin_history = []
 
 
 
@@ -30,6 +31,16 @@ def update_price_history(timestamp, binance, yandex, difference):
         "binance": binance,
         "yandex": yandex,
         "difference": difference
+    })
+
+def update_altin_history(timestamp, gram, s1, difference):
+    if len(altin_history) >= 100:
+        altin_history.pop(0)
+    altin_history.append({
+        "time": timestamp,
+        "gram": gram,
+        "s1": s1,
+        "fark": difference
     })
 
 @app.route('/')
@@ -118,8 +129,34 @@ def home():
 
 <canvas id="differenceChart"></canvas>
 <canvas id="priceChart"></canvas>
+<canvas id="goldChart"></canvas>
+<canvas id="goldDifferenceChart"></canvas>
 
 </div>
+
+<script>
+    const ctx3 = document.getElementById('goldChart').getContext('2d');
+    const goldChart = new Chart(ctx3, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                { label: 'Gram Altın', data: [], borderColor: '#FFD700', fill: true },
+                { label: 'S1 (x100)', data: [], borderColor: '#FFA500', fill: true }
+            ]
+        }
+    });
+    const ctx4 = document.getElementById('goldDifferenceChart').getContext('2d');
+    const goldDifferenceChart = new Chart(ctx4, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [
+                { label: 'Altın - S1 Fark (%)', data: [], borderColor: '#FF4444', fill: true }
+            ]
+        }
+    });
+</script>
 
 <script>
    async function updateCharts() {
@@ -136,6 +173,18 @@ def home():
        differenceChart.data.labels = data.labels;
        differenceChart.data.datasets[0].data = data.differences;
        differenceChart.update();
+
+       // Altın ve s1 için fiyat grafiği
+       goldChart.data.labels = data.goldLabels;
+       goldChart.data.datasets[0].data = data.gramPrices;
+       goldChart.data.datasets[1].data = data.s1Prices;
+       goldChart.update();
+
+       // Altın ve s1 için fark grafiği
+       goldDifferenceChart.data.labels = data.goldLabels;
+       goldDifferenceChart.data.datasets[0].data = data.goldDifferences;
+       goldDifferenceChart.update();
+       
    }
 
    const ctx1 = document.getElementById('priceChart').getContext('2d');
@@ -212,7 +261,11 @@ def chart_data():
         "labels": [entry["time"] for entry in price_history],
         "binancePrices": [entry["binance"] for entry in price_history],
         "yandexPrices": [entry["yandex"] for entry in price_history],
-        "differences": [entry["difference"] for entry in price_history]
+        "differences": [entry["difference"] for entry in price_history],
+        "goldLabels": [entry["time"] for entry in altin_history],
+        "gramPrices": [entry["gram"] for entry in altin_history],
+        "s1Prices": [entry["s1"] for entry in altin_history],
+        "goldDifferences": [entry["fark"] for entry in altin_history]
     })
 
 
@@ -291,88 +344,102 @@ def get_google_usd_try():
     
     return None
 
+def get_s1_price():
+    url = "https://finans.mynet.com/borsa/hisseler/altins1-darphane-altin-sertifikasi/"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content, 'html.parser')
+        price_div = soup.find('div', {'class': 'data-value'})
+        if price_div:
+
+            price = price_div.text.strip().replace(".", "")  # Virgülü noktaya çevir
+            price = price.replace(",", ".")  # Virgülü noktaya çevir
+            return float(price) * 100  # S1 fiyatını 100 ile çarp
+    return None
+
+def get_gold_price():
+    url = "https://finans.mynet.com/altin/xgld-spot-altin-tl-gr/"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content, 'html.parser')
+        price_span = soup.find('span', {'class': 'dynamic-price-GAUTRY'})
+        if price_span:
+            
+            price = price_span.text.strip().replace(".", "")  # Virgülü noktaya çevir
+            price = price.replace(",", ".")  # Virgülü noktaya çevir
+            return float(price)
+    return None
+
 # Fiyatları al, oranı hesapla ve Telegram'a gönder
 import time
 
 def calculate_and_send():
-    global last_message  # Global değişkeni güncelleyeceğiz
-    global last_action
-    global last_action_time
-    global show_time
-    global status
-    global oran
-    global USDTTRY
-    global USDTRY
-    global last_chart_update
-
-    
+    global last_action, last_action_time, show_time, status, oran, USDTTRY, USDTRY
+    global last_chart_update, last_message
     while True:
         try:
-            binance_price = get_binance_price()
-            USDTTRY = binance_price
+            # Binance ve Yandex fiyatlarını al
+            USDTTRY = get_binance_price()
+            USDTRY = get_google_usd_try()
+            # Altın ve S1 fiyatlarını al
+            gold_price = get_gold_price()
+            s1_price = get_s1_price()
+            print(f"Binance USDT/TRY: {USDTTRY}")
+            print(f"Yandex USD/TRY: {USDTRY}")
+            print(f"Gram Altın: {gold_price}")
+            print(f"S1 (x100): {s1_price}")
 
-            google_price = get_google_usd_try()
-            USDTRY = google_price
-            print(f"Binance USDT/TRY: {binance_price}")
-            print(f"Yandex USD/TRY: {google_price}")
-            if binance_price is None or google_price is None:
+            # Fiyatlar alındı mı kontrol et
+            if None in [USDTTRY, USDTRY, gold_price, s1_price]:
                 raise ValueError("Fiyat bilgileri alınamadı!")
-
-            # Farkı hesapla
-            difference = ((google_price - binance_price) / google_price) * 100
-            oran = str(difference)[:4]
-            timestamp = (datetime.now()+timedelta(hours=3)).strftime("%d-%m-%Y %H:%M:%S")
-            
+            # USDT/TRY - USD/TRY farkı hesapla
+            difference_usdt = ((USDTRY - USDTTRY) / USDTRY) * 100
+            oran = str(difference_usdt)[:4]
+            # Altın - S1 farkını hesapla
+            difference_gold = ((gold_price - s1_price) / gold_price) * 100
+            timestamp = (datetime.now() + timedelta(hours=3)).strftime("%d-%m-%Y %H:%M:%S")
+            # Grafik verilerini güncelle (Her 15 dakikada bir)
             if last_chart_update is None or (datetime.now() - last_chart_update) >= timedelta(minutes=15):
-                update_price_history(timestamp, binance_price, google_price, difference)
-                last_chart_update = datetime.now()  # Zaman damgasını güncelle
-        
-            # eğer fark 0,2 den büyükse sat 0 dan küçükse al eğer başka bir şey ise bekle
-            action = "BEKLE"
-            if difference < -1.95:
-                action = "SAT"
-                status ="SAT"
-            elif difference > 0:
-                action = "AL"
-                status ="AL"
-            else:
-                action = "BEKLE"
-                status ="BEKLE"
-                last_action=""
+                update_price_history(timestamp, USDTTRY, USDTRY, difference_usdt)
+                update_altin_history(timestamp, gold_price, s1_price, difference_gold)
+                last_chart_update = datetime.now()
+            # **Dolar ve USDT için AL/SAT BEKLE kararı**
+            action_usdt = "BEKLE"
+            if difference_usdt < -1.95:
+                action_usdt = "SAT"
+            elif difference_usdt > 0:
+                action_usdt = "AL"
+            # **Altın ve S1 için AL/SAT BEKLE kararı**
+            action_gold = "BEKLE"
+            if difference_gold > 0:
+                action_gold = "SAT"
+            elif difference_gold < -1.95:
+                action_gold = "AL"
+            # Telegram mesajı oluştur
             message = (
-                f"📢 **{action}** 📢\n"
-                f"🔹 **Binance USDT/TRY**: {binance_price} ₺\n"
-                f"🔹 **Yandex USD/TRY**: {google_price} ₺\n"
-                f"🔹 **Fark**: %{difference:.2f}\n"
+                f"📢 **{action_usdt} - {action_gold}** 📢\n"
+                f"🔹 **Binance USDT/TRY**: {USDTTRY} ₺\n"
+                f"🔹 **Yandex USD/TRY**: {USDTRY} ₺\n"
+                f"🔹 **Fark (USDT)**: %{difference_usdt:.2f}\n"
+                "----------------------------------\n"
+                f"🔸 **Gram Altın**: {gold_price} ₺\n"
+                f"🔸 **S1 (x100)**: {s1_price} ₺\n"
+                f"🔸 **Fark (Altın vs S1)**: %{difference_gold:.2f}"
             )
-            
-            
-            suan = datetime.now()+timedelta(hours=3)
-            if last_action_time is None:  # Eğer 'son' değişkeni daha önce atanmadıysa, şu anki zamana eşitle
+            # **Telegram mesajı gönderme mantığı**
+            suan = datetime.now() + timedelta(hours=3)
+            if action_usdt != "BEKLE" or action_gold != "BEKLE":  # Eğer biri bile "BEKLE" değilse mesaj at
+                send_telegram_message(message)
                 last_action_time = suan
-            if action != "BEKLE":
-                if last_action != action:
-                    send_telegram_message(message)
-                    last_action_time = suan
-                    show_time = last_action_time.strftime("%Y-%m-%d %H:%M:%S")
-                    last_action=action
-                    print("Mesaj gönderildi:", message)
-                else:
-                    fark = suan - last_action_time
-                    if fark>= timedelta(minutes=10):
-                        send_telegram_message(message)
-                        last_action_time = suan
-                        show_time = last_action_time.strftime("%Y-%m-%d %H:%M:%S")
-                        last_action=action
-                        print("Mesaj gönderildi:", message)
-            last_message = message
+                show_time = last_action_time.strftime("%Y-%m-%d %H:%M:%S")
+                last_action = f"{action_usdt} - {action_gold}"
 
+            last_message = message
         except Exception as e:
             print("Hata:", e)
-            last_message = e
-
-        # 1 dakika bekle (60 saniye)
-        time.sleep(60)
-
+            last_message = str(e)
+        time.sleep(1800)  # 30 dakika bekle
 # Hesaplama fonksiyonunu çalıştır
 calculate_and_send()
