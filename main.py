@@ -397,9 +397,9 @@ def calculate_and_send():
             USDTRY = get_google_usd_try()
             # Altın ve S1 fiyatlarını al
             gold_price = get_gold_price()
-            gramaltin = gold_price
+            gramaltin = str(gold_price)[:7]
             s1_price = get_s1_price()
-            mynets1=s1_price
+            mynets1=str(s1_price)[:7]
 
             # Fiyatlar alındı mı kontrol et
             if None in [USDTTRY, USDTRY, gold_price, s1_price]:
@@ -409,7 +409,7 @@ def calculate_and_send():
             oran = str(difference_usdt)[:4]
             # Altın - S1 farkını hesapla
             difference_gold = ((s1_price - gold_price) / s1_price) * 100
-            altinoran = difference_gold
+            altinoran = str(difference_gold)[:4]
             timestamp = (datetime.now() + timedelta(hours=3)).strftime("%d-%m-%Y %H:%M:%S")
             # Grafik verilerini güncelle (Her 15 dakikada bir)
             update_price_history(timestamp, USDTTRY, USDTRY, difference_usdt)
