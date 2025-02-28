@@ -440,6 +440,6 @@ def calculate_and_send():
         except Exception as e:
             print("Hata:", e)
             last_message = str(e)
-        time.sleep(1800)  # 30 dakika bekle
+        time.sleep(60)  # 30 dakika bekle
 # Hesaplama fonksiyonunu çalıştır
 calculate_and_send()
